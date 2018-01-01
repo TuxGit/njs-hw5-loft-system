@@ -6,7 +6,9 @@
 
 const app = require('../app');
 const debug = require('debug')('server:serv');
+const socketDebug = require('debug')('socket');
 const http = require('http');
+// const io = require('socket.io'); -> not work
 
 /**
  * Get port from environment and store in Express.
@@ -20,6 +22,39 @@ const port = normalizePort(process.env.PORT || '3000');
  */
 
 const server = http.createServer(app.callback());
+
+// socket connection for chat
+const users = {};
+const io = require('socket.io').listen(server);
+io.sockets.on('connection', function (socket) {
+  socketDebug(`Connection new user: id=${socket.id}`);
+
+  // добавляем подключившегося пользователя в словарь
+  users[socket.id] = {
+    id: socket.id,
+    username: socket.request.headers.username
+  };
+  // рассылаем информацию о событии на клиент
+  socket.json.emit('all users', users);
+  socket.broadcast.json.emit('new user', users[socket.id]);
+
+  socket.on('chat message', function (data, activeRoom) {
+    // отправляем сообщение в заданную комнату
+    socket.broadcast
+      .to(activeRoom)
+      .json.emit('chat message', data, socket.id);
+  });
+
+  socket.on('disconnect', function (client) {
+    socketDebug(`Client disconnect: id=${socket.id}`);
+
+    // удаляем пользователя
+    delete users[socket.id];
+    // в команте обновляем список пользователей на клиенте
+    socket.broadcast
+      .emit('delete user', socket.id);
+  });
+});
 
 /**
  * Listen on provided port, on all network interfaces.

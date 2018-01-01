@@ -5,8 +5,8 @@
   "scripts": {
     "start": "NODE_ENV=production node bin/www",
     "start_win": "set NODE_ENV=production&&node bin/www",
-    "dev": "DEBUG=server:* ./node_modules/.bin/nodemon bin/www",
-    "dev_win": "set DEBUG=server:serv,server:api&&set NODE_ENV=development&&nodemon bin/www",
+    "dev": "DEBUG=server:*,socket ./node_modules/.bin/nodemon bin/www",
+    "dev_win": "set DEBUG=server:serv,server:api,socket&&set NODE_ENV=development&&nodemon bin/www",
     "initapp": "node ./bin/init"
   },
   "dependencies": {
@@ -25,6 +25,7 @@
     "koa-views": "^5.2.1",
     "mongoose": "^4.13.7",
     "pug": "^2.0.0-rc.1",
+    "socket.io": "^2.0.4",
     "uuid": "^3.1.0"
   },
   "devDependencies": {
