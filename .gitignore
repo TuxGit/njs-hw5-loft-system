@@ -17,15 +17,15 @@ jspm_packages/
 .idea
 
 # local database
-data/db.json
+# data/db.json
 
 # config
 etc/config.json
 
 # temp data
 tmp
-public/upload/*
-!public/upload/.gitkeep
+public/uploads/*
+!public/uploads/.gitkeep
 
 # task/issue description
 .task

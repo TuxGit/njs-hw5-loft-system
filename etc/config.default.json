@@ -1,0 +1,9 @@
+{
+  "mail": {},
+  "mongodb": {
+    "uri": "mongodb://<user>:<password>@<host:port or [host:port]>/<db_name>?<params>"
+  },
+  "cookie": {
+    "timeout": 60
+  }
+}
