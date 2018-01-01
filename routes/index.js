@@ -1,7 +1,8 @@
 const router = require('koa-router')();
 
-router.get('/', async (ctx, next) => {
-  await ctx.render('pages/index', {
+// render index/main page route
+router.get('/([a-z0-9-_]*)', async (ctx, next) => {
+  await ctx.render('index', {
   });
 });
 
