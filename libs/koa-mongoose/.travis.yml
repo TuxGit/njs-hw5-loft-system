@@ -1,0 +1,7 @@
+language: node_js
+node_js:
+  - "7.7.1"
+services:
+  - mongodb
+env:
+  - HOST=127.0.0.1
