@@ -21,8 +21,6 @@ const UserPermissionSchema = new mongoose.Schema({
     R: Boolean,
     U: Boolean
   }
-  // createdAt: { type: Date, default: Date.now },
-  // updatedAt: { type: Date, default: Date.now }
 }, {
   timestamps: true
 });

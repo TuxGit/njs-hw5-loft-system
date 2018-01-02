@@ -31,7 +31,16 @@ router.post('/newNews', async (ctx, next) => {
     user: params.userId
   });
 
-  await news.save();
+  try {
+    await news.save();
+  } catch (e) {
+    console.log(e.stack);
+    ctx.status = 409;
+    ctx.body = {
+      error: e.message
+    };
+    return;
+  }
 
   ctx.status = 201;
   // ctx.body = news;
@@ -56,9 +65,17 @@ router.put('/updateNews/:id', async (ctx, next) => {
     }
   }
 
-  let result = await News.update({ _id: id }, { $set: updateProps }).exec();
-  // console.log(`update news, id=${id}: `, result);
-  // console.log(ctx);
+  try {
+    await News.update({ _id: id }, { $set: updateProps }).exec();
+  } catch (e) {
+    console.log(e.stack);
+    ctx.status = 409;
+    ctx.body = {
+      error: e.message
+    };
+    return;
+  }
+
   // ctx.body = {}
   ctx.body = await News.find().populate('user').exec();
 });
@@ -68,9 +85,17 @@ router.delete('/deleteNews/:id', async (ctx, next) => {
   const id = ctx.params.id;
   debug(`Delete news: id=${id}`);
 
-  let result = await News.remove({ _id: id });
-  // todo - if result? 204 else 404
-  // console.log(`delete news, id=${id}: `, result);
+  try {
+    await News.remove({ _id: id });
+  } catch (e) {
+    console.log(e.stack);
+    ctx.status = 409;
+    ctx.body = {
+      error: e.message
+    };
+    return;
+  }
+
   ctx.status = 204;
   // ctx.body = null;
   ctx.body = await News.find().populate('user').exec();

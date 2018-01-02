@@ -48,10 +48,7 @@ router.post('/login', async (ctx, next) => {
     username: params.username,
     password: crypto.createHash('md5').update(params.password).digest('hex')
   };
-  let user = await User.findOne(filterParams)
-    // .select('-__v')
-    .populate('permission')
-    .exec();
+  const user = await User.findOne(filterParams).populate('permission').exec();
 
   if (user) {
     if (params.remembered === true) {
@@ -62,8 +59,6 @@ router.post('/login', async (ctx, next) => {
       });
     }
 
-    // ctx.body = user.toClient();
-    // ctx.body = user.toJSON();
     ctx.body = user;
   } else {
     ctx.status = 401;
@@ -89,8 +84,8 @@ router.post('/saveNewUser', async (ctx, next) => {
   await userPermission.save();
 
   let user = null;
+  // const user = new User({
   try {
-    // const user = new User({
     user = new User({
       // _id: mongoose.Types.ObjectId(),
       username: params.username,
@@ -101,28 +96,19 @@ router.post('/saveNewUser', async (ctx, next) => {
       access_token: uuidv4(),
       image: null, // params.img
       permissionId: userPermission._id
-      // permission: params.permission // null
-      // permission: {
-      //   chat: { C: true, R: true, U: true, D: true },
-      //   news: { C: true, R: true, U: true, D: true },
-      //   setting: { C: true, R: true, U: true, D: true }
-      // }
     });
 
-    // let res = await user.save();
     await user.save();
   } catch (e) {
-    // await UserPermission.remove({ _id: userPermission._id });
     await userPermission.remove();
     console.log(e.stack);
-    ctx.status = 400;
+    ctx.status = 409;
     ctx.body = {
       error: e.message
     };
     return;
   }
 
-  // console.log('Create user: ', params);
   ctx.status = 201;
   // ctx.body = user;
   ctx.body = await User.findOne({ _id: user._id }).populate('permission').select('-password').exec();
@@ -134,10 +120,33 @@ router.put('/updateUser/:id', async (ctx, next) => {
   const params = ctx.request.body;
   debug(`Update user: id=${id}, params=`, params);
 
-  // if not found, exception : CastError: Cast to ObjectId failed for value "5a48bb751ed8ce23f4dd79e60" at path "_id" for model "User"
-  let result = await User.update({ _id: id }, { $set: params });
+  let filterParams = { _id: id };
+  // oldPassword, password
+  if (params.password) {
+    if (!params.oldPassword) {
+      ctx.status = 400;
+      ctx.body = {
+        error: 'Неправильные параметры смены пароля'
+      };
+      return;
+    }
+    filterParams['password'] = crypto.createHash('md5').update(params.oldPassword).digest('hex');
+    params['password'] = crypto.createHash('md5').update(params.password).digest('hex');
+  }
 
-  // console.log(`update user, id=${id}: `, result);
+  try {
+    // можно сначала получить запись, а потом обновлять её (можно выловить ошибку 404? - запись не найдена)
+    await User.update(filterParams, { $set: params }); // .exec() - вызывать?
+  } catch (e) {
+    // if not found, exception : CastError: Cast to ObjectId failed for value "5a48bb751ed8ce23f4dd79e60" at path "_id" for model "User"
+    console.log(e.stack);
+    ctx.status = 409;
+    ctx.body = {
+      error: e.message
+    };
+    return;
+  }
+
   ctx.body = await User.findOne({ _id: id }).exec();
 });
 
@@ -146,9 +155,19 @@ router.delete('/deleteUser/:id', async (ctx, next) => {
   const id = ctx.params.id;
   debug(`Delete user: id=${id}`);
 
-  let result = await User.remove({ _id: id });
-  // todo - if result? 204 else 404
-  // console.log(`delete user, id=${id}: `, result);
+  const user = await User.findOne({ _id: id }).exec();
+  try {
+    await UserPermission.remove({ _id: user.permissionId });
+    await User.remove({ _id: id }); // .exec() - вызывать?
+  } catch (e) {
+    console.log(e.stack);
+    ctx.status = 409;
+    ctx.body = {
+      error: e.message
+    };
+    return;
+  }
+
   ctx.status = 204;
   // ctx.body = null;
 });
@@ -159,12 +178,21 @@ router.put('/updateUserPermission/:id', async (ctx, next) => {
   const params = ctx.request.body;
   debug(`Update user permissions: id=${id}, params=`, params);
 
-  // await UserPermission.update({ _id: id }, { $set: params.permission });
-  let userPermission = await UserPermission.findOne({ _id: id });
+  let userPermission = await UserPermission.findOne({ _id: id }).exec();
   for (let key in params.permission) {
     userPermission[key] = Object.assign({}, userPermission[key], params.permission[key]);
   }
-  await userPermission.save();
+
+  try {
+    await userPermission.save();
+  } catch (e) {
+    console.log(e.stack);
+    ctx.status = 409;
+    ctx.body = {
+      error: e.message
+    };
+    return;
+  }
 
   // ctx.body = await UserPermission.findOne({ _id: id });
   ctx.body = userPermission;
