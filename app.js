@@ -32,23 +32,28 @@ app.use(bodyparser({
     json: ['text/plain'] // fix! - will parse text/plain type body as a JSON string
   }
 }));
+// красиво выводит ответ json при отладке
 app.use(json({
   pretty: app.env === 'development'
-})); // красиво выводит ответ json при отладке
-app.use(logger());
+}));
+if (app.env === 'development') {
+  app.use(logger());
+}
 app.use(require('koa-static')(path.join(__dirname, 'public')));
 
 app.use(views(path.join(__dirname, 'views'), {
   extension: 'pug'
 }));
 
-// logger
-app.use(async (ctx, next) => {
-  const start = new Date();
-  await next();
-  const ms = new Date() - start;
-  console.log(`${ctx.method} ${ctx.url} - ${ms}ms`);
-});
+if (app.env === 'development') {
+  // logger
+  app.use(async (ctx, next) => {
+    const start = new Date();
+    await next();
+    const ms = new Date() - start;
+    console.log(`${ctx.method} ${ctx.url} - ${ms}ms`);
+  });
+}
 
 // routes
 app.use(apiRouter.routes(), apiRouter.allowedMethods());
