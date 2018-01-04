@@ -6,7 +6,7 @@ const multer = require('koa-multer');
 // const upload = multer({ dest: 'public/uploads/' }); - simple usage
 const uploadMulterMiddleware = multer({
   storage: multer.diskStorage({
-    destination: 'public/uploads/',
+    destination: 'public/uploads/tmp/',
     filename: function (req, file, cb) {
       crypto.pseudoRandomBytes(16, function (err, raw) {
         if (err) return cb(err);

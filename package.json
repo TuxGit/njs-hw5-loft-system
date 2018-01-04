@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "debug": "^2.6.3",
+    "gm": "^1.23.1",
     "koa": "^2.2.0",
     "koa-body": "^2.5.0",
     "koa-bodyparser": "^4.2.0",

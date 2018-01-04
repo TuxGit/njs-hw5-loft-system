@@ -10,7 +10,8 @@ router.get('/getNews', async (ctx, next) => {
   debug('Get news');
 
   // todo - убрать загрузку всех полей пользователя user!
-  let news = await News.find().populate('user').exec();
+  // let news = await News.find().populate('user').exec(); // .then(doc => { return doc; });
+  const news = await News.find().populate('user', 'id image').exec();
 
   if (news) {
     ctx.body = news;
@@ -45,7 +46,7 @@ router.post('/newNews', async (ctx, next) => {
   ctx.status = 201;
   // ctx.body = news;
   // ctx.body = await News.findOne({ _id: news._id }).populate('user').exec();
-  ctx.body = await News.find().populate('user').exec();
+  ctx.body = await News.find().populate('user', 'image').exec();
 });
 
 // PUT-запрос на /api/updateNews/:id - обновление существующей новости. Необходимо вернуть обновленный список всех новостей из базы данных.
@@ -54,7 +55,7 @@ router.put('/updateNews/:id', async (ctx, next) => {
   const params = ctx.request.body;
   debug(`Update news: id=${id}, params=`, params);
 
-  let updateProps = {};
+  let updateProps = {}; // const
   for (let key in params) {
     if (key) {
       if (key === 'userId') {
@@ -77,7 +78,7 @@ router.put('/updateNews/:id', async (ctx, next) => {
   }
 
   // ctx.body = {}
-  ctx.body = await News.find().populate('user').exec();
+  ctx.body = await News.find().populate('user', 'image').exec();
 });
 
 // DELETE-запрос на /api/deleteNews/:id - удаление существующей новости. Необходимо вернуть обновленный список всех новостей из базы данных.
@@ -98,7 +99,7 @@ router.delete('/deleteNews/:id', async (ctx, next) => {
 
   ctx.status = 204;
   // ctx.body = null;
-  ctx.body = await News.find().populate('user').exec();
+  ctx.body = await News.find().populate('user', 'image').exec();
 });
 
 module.exports = router;

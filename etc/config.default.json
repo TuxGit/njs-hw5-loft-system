@@ -5,5 +5,10 @@
   },
   "cookie": {
     "timeout": 60
+  },
+  "user_image": {
+    "max_width": 350,
+    "max_height": 350,
+    "quality": 80
   }
 }

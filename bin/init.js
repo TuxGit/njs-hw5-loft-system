@@ -13,3 +13,8 @@ if (!fs.existsSync(path.join(__dirname, '..', 'etc', 'config.json'))) {
     path.join(__dirname, '..', 'etc', 'config.json')
   );
 }
+
+// #3 создание технологических директорий
+if (!fs.existsSync(path.join(__dirname, '..', 'public', 'uploads', 'tmp'))) {
+  fs.mkdirSync(path.join(__dirname, '..', 'public', 'uploads', 'tmp'), 0o777);
+}

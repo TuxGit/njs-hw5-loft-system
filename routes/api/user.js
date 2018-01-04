@@ -13,6 +13,8 @@ const { uploadMulterMiddleware } = require('../../utils/middleware');
 const UserPermission = require('../../models/UserPermission');
 const User = require('../../models/User');
 
+const { resizeImage } = require('../../utils/image');
+
 const config = require('../../etc/config.json');
 
 /* --- */
@@ -23,7 +25,7 @@ router.post('/authFromToken', async (ctx, next) => {
   const params = ctx.request.body;
   debug('Login user with token: params=', params);
 
-  let user = await User.findOne({
+  const user = await User.findOne({
     access_token: params.access_token
   }).populate('permission'); // .exec() - вызывать?
 
@@ -44,7 +46,7 @@ router.post('/login', async (ctx, next) => {
   const params = ctx.request.body;
   debug('Login user: params=', params);
 
-  let filterParams = {
+  const filterParams = {
     username: params.username,
     password: crypto.createHash('md5').update(params.password).digest('hex')
   };
@@ -120,7 +122,7 @@ router.put('/updateUser/:id', async (ctx, next) => {
   const params = ctx.request.body;
   debug(`Update user: id=${id}, params=`, params);
 
-  let filterParams = { _id: id };
+  let filterParams = { _id: id }; // const
   // oldPassword, password
   if (params.password) {
     if (!params.oldPassword) {
@@ -178,7 +180,7 @@ router.put('/updateUserPermission/:id', async (ctx, next) => {
   const params = ctx.request.body;
   debug(`Update user permissions: id=${id}, params=`, params);
 
-  let userPermission = await UserPermission.findOne({ _id: id }).exec();
+  const userPermission = await UserPermission.findOne({ _id: id }).exec();
   for (let key in params.permission) {
     userPermission[key] = Object.assign({}, userPermission[key], params.permission[key]);
   }
@@ -200,9 +202,6 @@ router.put('/updateUserPermission/:id', async (ctx, next) => {
 
 // POST-запрос на /api/saveUserImage/:id - сохранение изображения пользователя. Необходимо вернуть объект со свойством path, которое хранит путь до сохраненного изображения.
 router.post('/saveUserImage/:id', uploadMulterMiddleware.any(), async (ctx, next) => {
-  // todo:
-  // 1 - удаление предыдущей аватарки (+)
-  // 2 - компрессия и ресайз картинок (-)
   const id = ctx.params.id; // user id
   // !!! ctx.req.files
   const file = ctx.req.files[0];
@@ -216,13 +215,27 @@ router.post('/saveUserImage/:id', uploadMulterMiddleware.any(), async (ctx, next
     return;
   }
 
+  // optimize user image (avatar)
+  try {
+    await resizeImage(
+      path.join(process.cwd(), file.path),
+      path.join(process.cwd(), 'public', 'uploads', path.basename(file.path)),
+      config.user_image
+    );
+  } catch (e) {
+    console.log('Не вышло оптимизоровать аватарку пользователя: ', e);
+    fs.renameSync(path.join(process.cwd(), file.path), path.join(process.cwd(), 'public', 'uploads', path.basename(file.path)));
+  }
+  // end optimize
+
   const user = await User.findOne({ _id: id }).exec();
-  if (user.image) {
+  if (user.image && fs.existsSync(path.join(process.cwd(), 'public', user.image))) {
     fs.unlinkSync(path.join(process.cwd(), 'public', user.image));
   }
 
   ctx.body = {
-    path: file.path.replace(/\\/g, '/').replace(/^public\//, '')
+    // path: file.path.replace(/\\/g, '/').replace(/^public\//, '')
+    path: ['uploads', path.basename(file.path)].join('/')
   };
 });
 

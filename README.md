@@ -17,3 +17,6 @@ npm run dev (on windows: npm run dev_win )
 запуск в "проде"
 npm run start (on windows: npm run start_win )
 ```
+
+## Дополнительно
+Для работы функции оптимизации аватарок пользователя следует установить библиотеку [GraphicsMagick](http://www.graphicsmagick.org/download.html)
