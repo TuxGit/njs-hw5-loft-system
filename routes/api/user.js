@@ -103,12 +103,14 @@ router.post('/saveNewUser', async (ctx, next) => {
     await user.save();
   } catch (e) {
     await userPermission.remove();
-    console.log(e.stack);
-    ctx.status = 409;
-    ctx.body = {
-      error: e.message
-    };
-    return;
+
+    // console.log(e.stack);
+    // ctx.status = 409;
+    // ctx.body = {
+    //   error: e.message
+    // };
+    // return;
+    ctx.throw(409, e.message); // or throw e;
   }
 
   ctx.status = 201;
@@ -141,15 +143,10 @@ router.put('/updateUser/:id', async (ctx, next) => {
     await User.update(filterParams, { $set: params }); // .exec() - вызывать?
   } catch (e) {
     // if not found, exception : CastError: Cast to ObjectId failed for value "5a48bb751ed8ce23f4dd79e60" at path "_id" for model "User"
-    console.log(e.stack);
-    ctx.status = 409;
-    ctx.body = {
-      error: e.message
-    };
-    return;
+    ctx.throw(409, e.message);
   }
 
-  ctx.body = await User.findOne({ _id: id }).exec();
+  ctx.body = await User.findOne({ _id: id }).populate('permission').select('-password').exec();
 });
 
 // DELETE-запрос на /api/deleteUser/:id - удаление пользователя.
@@ -162,12 +159,7 @@ router.delete('/deleteUser/:id', async (ctx, next) => {
     await UserPermission.remove({ _id: user.permissionId });
     await User.remove({ _id: id }); // .exec() - вызывать?
   } catch (e) {
-    console.log(e.stack);
-    ctx.status = 409;
-    ctx.body = {
-      error: e.message
-    };
-    return;
+    ctx.throw(409, e.message);
   }
 
   ctx.status = 204;
@@ -188,12 +180,7 @@ router.put('/updateUserPermission/:id', async (ctx, next) => {
   try {
     await userPermission.save();
   } catch (e) {
-    console.log(e.stack);
-    ctx.status = 409;
-    ctx.body = {
-      error: e.message
-    };
-    return;
+    ctx.throw(409, e.message);
   }
 
   // ctx.body = await UserPermission.findOne({ _id: id });

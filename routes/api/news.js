@@ -35,12 +35,7 @@ router.post('/newNews', async (ctx, next) => {
   try {
     await news.save();
   } catch (e) {
-    console.log(e.stack);
-    ctx.status = 409;
-    ctx.body = {
-      error: e.message
-    };
-    return;
+    ctx.throw(409, e.message);
   }
 
   ctx.status = 201;
@@ -69,12 +64,7 @@ router.put('/updateNews/:id', async (ctx, next) => {
   try {
     await News.update({ _id: id }, { $set: updateProps }).exec();
   } catch (e) {
-    console.log(e.stack);
-    ctx.status = 409;
-    ctx.body = {
-      error: e.message
-    };
-    return;
+    ctx.throw(409, e.message);
   }
 
   // ctx.body = {}
@@ -89,12 +79,7 @@ router.delete('/deleteNews/:id', async (ctx, next) => {
   try {
     await News.remove({ _id: id });
   } catch (e) {
-    console.log(e.stack);
-    ctx.status = 409;
-    ctx.body = {
-      error: e.message
-    };
-    return;
+    ctx.throw(409, e.message);
   }
 
   ctx.status = 204;

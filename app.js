@@ -55,6 +55,19 @@ if (app.env === 'development') {
   });
 }
 
+// error catch
+app.use(async (ctx, next) => {
+  try {
+    await next();
+  } catch (err) {
+    ctx.status = err.status || 500;
+    ctx.body = {
+      error: err.message
+    };
+    ctx.app.emit('error', err, ctx); // -> app.on('error' ...
+  }
+});
+
 // routes
 app.use(apiRouter.routes(), apiRouter.allowedMethods());
 app.use(index.routes(), index.allowedMethods());
