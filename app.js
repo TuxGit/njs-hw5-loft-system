@@ -8,7 +8,8 @@ const onerror = require('koa-onerror');
 const bodyparser = require('koa-bodyparser');
 const logger = require('koa-logger');
 
-const config = require('./etc/config.json');
+// const config = require('./etc/config.json');
+const config = require('./etc/config.js');
 // const DEBUG = process.env.DEBUG === 'true'; -> app.env === 'development'
 
 // const mongooseMiddleware = require('koa-mongoose');

@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "heroku:start": "node bin/init && node bin/www",
+    "heroku:dev_tmpl": "NODE_ENV=production COOKIE_TIMEOUT=10 MONGODB_URI=... USER_IMAGE={} node bin/init && node bin/www",
     "start": "NODE_ENV=production node bin/www",
     "start_win": "set NODE_ENV=production&&node bin/www",
     "dev": "DEBUG=server:*,socket ./node_modules/.bin/nodemon bin/www",
@@ -31,5 +33,9 @@
   },
   "devDependencies": {
     "nodemon": "^1.8.1"
+  },
+  "engines": {
+    "node": "9.2.x",
+    "npm": "5.6.x"
   }
 }

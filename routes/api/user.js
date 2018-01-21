@@ -15,7 +15,8 @@ const User = require('../../models/User');
 
 const { resizeImage } = require('../../utils/image');
 
-const config = require('../../etc/config.json');
+// const config = require('../../etc/config.json');
+const config = require('../../etc/config.js');
 
 /* --- */
 
