@@ -20,3 +20,4 @@ npm run start (on windows: npm run start_win )
 
 ## Дополнительно
 Для работы функции оптимизации аватарок пользователя следует установить библиотеку [GraphicsMagick](http://www.graphicsmagick.org/download.html)
+
