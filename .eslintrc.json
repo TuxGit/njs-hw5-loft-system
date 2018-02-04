@@ -3,5 +3,8 @@
   "rules": {
     "no-extra-semi": "error",
     "semi": [2, "always"]
+  },
+  "env": {
+    "mocha": true
   }
 }
